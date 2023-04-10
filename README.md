@@ -1,2 +1,2 @@
 # Platformer2D_Rafa
- NinjaDragon
+ NinjaDragon, aún en proceso con varios bugs...
