@@ -135,12 +135,13 @@ public class Player : MonoBehaviour
     private void Jump()
     {
         isGrounded = Physics2D.OverlapBox(groundCheck.position, gizmosBoxDimensions, 0.01f, groundLayer) //Checa si está en el suelo con el contacto que hace el gizmos con el layer que le asignemos para tierra en este caso Platform
-        || Physics2D.OverlapBox(groundCheck.position, gizmosBoxDimensions, 0.01f, groundLayer2); //Checa en el Layer 2 que sería el enemigo porque quiero que salte sobre ellos
-        // Si no está en el suelo, entonces se establece el valor de "jumping" en verdadero, si sí está en el suelo la animación se desactiva
+        || Physics2D.OverlapBox(groundCheck.position, gizmosBoxDimensions, 0.01f, groundLayer2); //Checa en el Layer 2 que sería el enemigo porque quiero que salte sobre ellos        
+        // Si no está en el suelo, entonces se establece el valor de "jumping" en verdadero, si sí está en el suelo la animación se desactiva        
         animatorPlayer.SetBool("isJumping", !isGrounded);
-        if (isGrounded && Mathf.Abs(rbPlayer.velocity.y) < 0.22f && Input.GetButtonDown("Jump")) //Si está en el suelo sin velocidad de caida o subida y presiona salto:
+        if (isGrounded && Mathf.Abs(rbPlayer.velocity.y) < 0.2f && Input.GetButtonDown("Jump")) //Si está en el suelo sin velocidad de caida o subida y presiona salto:
         {
-            isGrounded = false;   //No está en el suelo
+            isGrounded = false;
+            animatorPlayer.SetFloat("blendJump", 0);
             rbPlayer.AddForce(new Vector2(0f, jumpForce * 10)); //Se le da impulso de salto, le multipliqué por 10 porque necesita mucha fuerza
         }
         
@@ -174,18 +175,27 @@ public class Player : MonoBehaviour
     {
         if (!animatorPlayer.GetBool("isCrouching") && Input.GetAxisRaw("Vertical") == 0 && Input.GetButtonDown("Fire1")) 
         {
+            animatorPlayer.SetFloat("blendJump", 1f);
             onAttack = true;
             boxCollAttack.enabled = true;
             animatorPlayer.SetTrigger("attack");
             if (!isGrounded)  //Si está en el aire da un ligero impulso hacia arriba
-            rbPlayer.AddForce(new Vector2(0, jumpAtkForce * 10));                
+            {
+                animatorPlayer.SetFloat("blendJump", 1f);
+                rbPlayer.AddForce(new Vector2(0, jumpAtkForce * 10));
+            }
+                            
         }
     }
     private void Skill()
     {
         if (!onAttack && Input.GetAxisRaw("Vertical") > 0 && Input.GetButton("Fire1"))
-            animatorPlayer.SetTrigger("fireball");         
+            if(isGrounded)
+                animatorPlayer.SetTrigger("fireball");
+            else
+            animatorPlayer.SetFloat("blendJump", 1f);  //Está muy rota la habilidad aún hay que mejorarla así que le asigné 1 de ataque
     }
+    // Las siguientes dos funciones van al final de la animación como eventos:
     private void Fireball()
     {
         GameObject fireballtemp = Instantiate(fireball, firePoint.position, firePoint.rotation);
@@ -197,6 +207,7 @@ public class Player : MonoBehaviour
         boxCollAttack.enabled = false;
     }
     #endregion
+
     private void OnDrawGizmos() //Dibuja el gizmos que hace contacto en el suelo con amarillo para que se pueda ver y manipular
     {
         Gizmos.color = Color.yellow;
@@ -215,6 +226,7 @@ public class Player : MonoBehaviour
         {
             lifes[numLifes - 1].SetActive(false);
             numLifes--;
+            animatorPlayer.SetTrigger("hurt");
         }
         else
         {
