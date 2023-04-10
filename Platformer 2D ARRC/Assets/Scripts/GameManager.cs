@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
 
     public static int points;
     public static int maxPoints;
-
+    public static int lifesPlayer = 3;
     //Este Awake es complementario a lo anterior, hace una instancia de esta clase desde el principio de todo.
     private void Awake()
     {
@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
         }
 
         maxPoints = PlayerPrefs.GetInt("Maxpoints", 0); //Cargar el valor de maxPoints desde PlayerPrefs
-        points = 0; //Se reinician los puntos cada que cargue la escena desde cero
+        points = 0; 
     }
 
     //De aquí para adelante empiezan los métodos generales del Game Manager:

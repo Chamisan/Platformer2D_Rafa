@@ -50,7 +50,7 @@ public class Player : MonoBehaviour
     #endregion
     private void Start()
     {
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);  ya no porque uso los datos del GameManager para pasar las vidas
         Time.timeScale = 1;
         gameoverPanel.SetActive(false);
         winPanel.SetActive(false);
@@ -61,9 +61,24 @@ public class Player : MonoBehaviour
         boxCollAttack.enabled = false;
         boxCollCrouch.enabled = false;
         boxCollCrouchFlag.enabled = false;
-        numLifes = 3;
+        numLifes = GameManager.lifesPlayer;
         if(GameObject.FindGameObjectWithTag("Checkpoint")!=null)
         checkpointPosition = GameObject.FindGameObjectWithTag("Checkpoint").GetComponent<Transform>().position; 
+        foreach(GameObject hearth in lifes)  //Esto me ayuda a pasar el número de vidas más fácil al siguiente nivel que emparentando no pude :s
+        {
+            // Obtener el índice del objeto hearth
+            int hearthIndex = System.Array.IndexOf(lifes, hearth);
+
+            // Si el índice es menor que numLifes, activar el objeto, de lo contrario desactivarlo
+            if (hearthIndex < numLifes)
+            {
+                hearth.SetActive(true);
+            }
+            else
+            {
+                hearth.SetActive(false);
+            }
+        }
     }
     private void Update()
     {
@@ -181,7 +196,7 @@ public class Player : MonoBehaviour
         onAttack = false; 
         boxCollAttack.enabled = false;
     }
-#endregion
+    #endregion
     private void OnDrawGizmos() //Dibuja el gizmos que hace contacto en el suelo con amarillo para que se pueda ver y manipular
     {
         Gizmos.color = Color.yellow;
@@ -202,12 +217,17 @@ public class Player : MonoBehaviour
             numLifes--;
         }
         else
+        {
+            gameoverPanel.SetActive(true);
+            GameManager.PauseGame();
             gameObject.SetActive(false);
+        }
     }
-    private void Win() //Gana, activa el panel del ganador: Win y se pausa el juego
+    private void Win() 
     {
         //Si la escena dos está activada que active el winPanel, sino
         winPanel.SetActive(true);
+        GameManager.lifesPlayer = numLifes;
         Time.timeScale = 0; 
         //Sino que active el panel nextLvl
         //nextLvlPanel.SetActive(true);
@@ -221,7 +241,8 @@ public class Player : MonoBehaviour
             {
                 numLifes++;
                 lifes[numLifes - 1].SetActive(true);
-            }
+                Destroy(other.gameObject);
+            }            
         if (other.gameObject.CompareTag("DeathZone"))
         {
             StartCoroutine(Resurection()); //En esta corrutina de "Resurrección" se reinicia
@@ -238,20 +259,16 @@ public class Player : MonoBehaviour
     {
         if (other.CompareTag("Platform"))
             crouchFlag = false;
-        if (other.gameObject.CompareTag("Life"))
-            Destroy(other.gameObject);
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Foe") && !onAttack)
             TakeDamage();
         if (collision.gameObject.CompareTag("TotalDeath"))
+        {
+            gameoverPanel.SetActive(true);
             gameObject.SetActive(false);
-    }
-    private void OnDisable()
-    {
-        gameoverPanel.SetActive(true);
-        GameManager.PauseGame();
-        Destroy(gameObject, 3);
+            GameManager.PauseGame();
+        }
     }
 }
