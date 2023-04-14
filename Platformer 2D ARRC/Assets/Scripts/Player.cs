@@ -226,6 +226,7 @@ public class Player : MonoBehaviour
         {
             lifes[numLifes - 1].SetActive(false);
             numLifes--;
+            ModifyPoints(-25);
             animatorPlayer.SetTrigger("hurt");
         }
         else
@@ -244,6 +245,13 @@ public class Player : MonoBehaviour
         //Sino que active el panel nextLvl
         //nextLvlPanel.SetActive(true);
     }
+    private void ModifyPoints(int points)
+    {
+        if (GameManager.points + points >= 0) //Si la resta es mayor a cero entonces que le quite sino que lo deje en 0
+            GameManager.points += points;
+    }
+
+    
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.CompareTag("Platform"))
@@ -252,6 +260,7 @@ public class Player : MonoBehaviour
             if (numLifes < maxLifes)
             {
                 numLifes++;
+                ModifyPoints(50);
                 lifes[numLifes - 1].SetActive(true);
                 Destroy(other.gameObject);
             }            
