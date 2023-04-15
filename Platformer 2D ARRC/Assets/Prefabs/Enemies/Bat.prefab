@@ -158,3 +158,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   foeVelocity: 0
+  clipFoeDie: {fileID: 8300000, guid: 3c06fc7dfae5aea46a6d1a29c2f70946, type: 3}

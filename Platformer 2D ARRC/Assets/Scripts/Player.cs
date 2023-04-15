@@ -45,6 +45,14 @@ public class Player : MonoBehaviour
     [SerializeField] Transform firePoint;
     public bool onAttack;
 
+    [Header("SFX")]
+    [SerializeField] AudioClip audioFruit;
+    [SerializeField] AudioClip audioDash;
+    [SerializeField] AudioClip audioJump;
+    [SerializeField] AudioClip audioFire;
+    [SerializeField] AudioClip [] audioSword;
+    private AudioSource audioSrc;
+
     private Vector3 spawnPosition, checkpointPosition; //Para las posiciones de spawn del personaje
     private Animator animatorPlayer;
     #endregion
@@ -57,6 +65,7 @@ public class Player : MonoBehaviour
         rbPlayer = gameObject.GetComponent<Rigidbody2D>();
         spawnPosition = transform.position;
         animatorPlayer = GetComponent<Animator>();
+        audioSrc = GetComponent<AudioSource>();
         boxCollAttack.enabled = false;
         boxCollCrouch.enabled = false;
         boxCollCrouchFlag.enabled = false;
@@ -115,14 +124,16 @@ public class Player : MonoBehaviour
         if (isGrounded && Mathf.Abs(rbPlayer.velocity.x) < maxDashVelocity && Input.GetAxisRaw("Vertical") < 0 && Input.GetButton("Fire1") && !onAttack)
         {
             animatorPlayer.SetTrigger("crouchDash");
+            //PlaySound(audioDash);
             // Añade fuerza de impulso que permita avanzar rápido hacia el lado donde está mirando            
-            rbPlayer.AddForce(new Vector2(transform.localScale.x * dashForce, 0.5f), ForceMode2D.Impulse);
+            rbPlayer.AddForce(new Vector2(transform.localScale.x * dashForce, 0.3f), ForceMode2D.Impulse);
         }
     }
     private void WindCrouchDash() // Crea la animación del windDash:
     {
         GameObject windDashtemp = Instantiate(windDash, dashPoint.position, dashPoint.rotation);
-            windDashtemp.transform.localScale = new Vector3(transform.localScale.x, windDashtemp.transform.localScale.y, windDashtemp.transform.localScale.z);
+        AudioManager.instance.PlaySound(audioJump);
+        windDashtemp.transform.localScale = new Vector3(transform.localScale.x, windDashtemp.transform.localScale.y, windDashtemp.transform.localScale.z);
         Destroy(windDashtemp, 1f);
     }
     private void Jump()
@@ -135,6 +146,7 @@ public class Player : MonoBehaviour
         {
             isGrounded = false;
             animatorPlayer.SetFloat("blendJump", 0);
+            //PlaySound(audioJump);
             rbPlayer.AddForce(new Vector2(0f, jumpForce * 10)); //Se le da impulso de salto, le multipliqué por 10 porque necesita mucha fuerza
             WindCrouchDash(); //Le agregué una animación de polvo al salto
         }
@@ -169,7 +181,7 @@ public class Player : MonoBehaviour
     {
         if (!animatorPlayer.GetBool("isCrouching") && Input.GetAxisRaw("Vertical") == 0 && Input.GetButtonDown("Fire1")) 
         {
-            animatorPlayer.SetFloat("blendJump", 1f);
+            //animatorPlayer.SetFloat("blendJump", 1f);
             onAttack = true;
             boxCollAttack.enabled = true;
             animatorPlayer.SetTrigger("attack");
@@ -192,6 +204,7 @@ public class Player : MonoBehaviour
     // Las siguientes dos funciones van al final de la animación como eventos:
     private void Fireball()
     {
+        AudioManager.instance.PlaySound(audioFire);
         GameObject fireballtemp = Instantiate(fireball, firePoint.position, firePoint.rotation);
         Destroy(fireballtemp, 3f);
     }
@@ -200,6 +213,8 @@ public class Player : MonoBehaviour
         onAttack = false; 
         boxCollAttack.enabled = false;
     }
+    private void SoundSwords() => AudioManager.instance.PlaySound(audioSword[Random.Range(0, audioSword.Length)]);
+
     #endregion
 
     private IEnumerator Resurection() //Esta es la corrutina que hace que el personaje reinicie posición
@@ -238,6 +253,11 @@ public class Player : MonoBehaviour
         if (GameManager.points + points >= 0) //Si la resta es mayor a cero entonces que le quite sino que lo deje en 0
             GameManager.points += points;
     }
+    /*public void PlaySound(AudioClip clip)
+    {
+        audioSrc.PlayOneShot(clip);
+        Debug.Log("Reproduciendo clip de audio: " + clip.name);
+    }*/
     private void OnDrawGizmos() //Dibuja el gizmos que hace contacto en el suelo con amarillo para que se pueda ver y manipular
     {
         Gizmos.color = Color.yellow;
@@ -248,7 +268,8 @@ public class Player : MonoBehaviour
         if (other.gameObject.CompareTag("Platform"))
             crouchFlag = true;
         if (other.gameObject.CompareTag("Life"))
-            if (numLifes < maxLifes)
+            //AudioManager.instance.PlaySound(audioFruit);
+        if (numLifes < maxLifes)
             {
                 numLifes++;
                 ModifyPoints(50);
@@ -271,6 +292,15 @@ public class Player : MonoBehaviour
             spawnPosition = checkpointPosition + new Vector3(1,2,0); //El vector 3 extra es porque sino queda atorado en el suelo así que lo muevo tantito
         if (other.gameObject.CompareTag("Finish")) //Si el personaje obtiene el objeto meta que tiene el tag Finish, gana :)
             Win();
+        if (other.gameObject.name == "dragonEye")
+        {
+            AudioSource audioSource = other.gameObject.GetComponent<AudioSource>();
+            if (audioSource != null && audioSource.clip != null)
+            {
+                AudioManager.instance.PlaySound(audioSource.clip);
+            }
+        }
+
     }
     private void OnTriggerExit2D(Collider2D other)
     {
