@@ -50,8 +50,7 @@ public class Player : MonoBehaviour
     #endregion
     private void Start()
     {
-        //DontDestroyOnLoad(gameObject);  ya no porque uso los datos del GameManager para pasar las vidas
-        Time.timeScale = 1;
+        GameManager.PlayGame();
         gameoverPanel.SetActive(false);
         winPanel.SetActive(false);
         onAttack = false;
@@ -61,24 +60,19 @@ public class Player : MonoBehaviour
         boxCollAttack.enabled = false;
         boxCollCrouch.enabled = false;
         boxCollCrouchFlag.enabled = false;
+        if (GameObject.FindGameObjectWithTag("Checkpoint") != null)
+            checkpointPosition = GameObject.FindGameObjectWithTag("Checkpoint").GetComponent<Transform>().position;
         numLifes = GameManager.lifesPlayer;
-        if(GameObject.FindGameObjectWithTag("Checkpoint")!=null)
-        checkpointPosition = GameObject.FindGameObjectWithTag("Checkpoint").GetComponent<Transform>().position; 
-        foreach(GameObject hearth in lifes)  //Esto me ayuda a pasar el número de vidas más fácil al siguiente nivel que emparentando no pude :s
+        foreach(GameObject hearth in lifes)  
         {
             // Obtener el índice del objeto hearth
             int hearthIndex = System.Array.IndexOf(lifes, hearth);
-
             // Si el índice es menor que numLifes, activar el objeto, de lo contrario desactivarlo
             if (hearthIndex < numLifes)
-            {
                 hearth.SetActive(true);
-            }
             else
-            {
                 hearth.SetActive(false);
-            }
-        }
+        } //Esto me ayuda a pasar el número de vidas más fácil al siguiente nivel que emparentando no pude :s
     }
     private void Update()
     {
@@ -125,7 +119,6 @@ public class Player : MonoBehaviour
             rbPlayer.AddForce(new Vector2(transform.localScale.x * dashForce, 0.5f), ForceMode2D.Impulse);
         }
     }
-    private void EndCrouchDash() => GetComponent<Rigidbody2D>().gravityScale = 3.6f;
     private void WindCrouchDash() // Crea la animación del windDash:
     {
         GameObject windDashtemp = Instantiate(windDash, dashPoint.position, dashPoint.rotation);
@@ -143,6 +136,7 @@ public class Player : MonoBehaviour
             isGrounded = false;
             animatorPlayer.SetFloat("blendJump", 0);
             rbPlayer.AddForce(new Vector2(0f, jumpForce * 10)); //Se le da impulso de salto, le multipliqué por 10 porque necesita mucha fuerza
+            WindCrouchDash(); //Le agregué una animación de polvo al salto
         }
         
     }
@@ -208,11 +202,6 @@ public class Player : MonoBehaviour
     }
     #endregion
 
-    private void OnDrawGizmos() //Dibuja el gizmos que hace contacto en el suelo con amarillo para que se pueda ver y manipular
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(groundCheck.position, gizmosBoxDimensions);
-    }
     private IEnumerator Resurection() //Esta es la corrutina que hace que el personaje reinicie posición
     {
         Time.timeScale = 0.04f; //Primero se alenta el juego
@@ -236,22 +225,24 @@ public class Player : MonoBehaviour
             gameObject.SetActive(false);
         }
     }
-    private void Win() 
+    private void Win()  
     {
-        //Si la escena dos está activada que active el winPanel, sino
         winPanel.SetActive(true);
         GameManager.lifesPlayer = numLifes;
-        Time.timeScale = 0; 
-        //Sino que active el panel nextLvl
-        //nextLvlPanel.SetActive(true);
+        GameManager.PauseGame();
+        if (GameManager.points > PlayerPrefs.GetInt("MaxPoints"))
+            PlayerPrefs.SetInt("MaxPoints", GameManager.points);
     }
     private void ModifyPoints(int points)
     {
         if (GameManager.points + points >= 0) //Si la resta es mayor a cero entonces que le quite sino que lo deje en 0
             GameManager.points += points;
     }
-
-    
+    private void OnDrawGizmos() //Dibuja el gizmos que hace contacto en el suelo con amarillo para que se pueda ver y manipular
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(groundCheck.position, gizmosBoxDimensions);
+    }
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.CompareTag("Platform"))
@@ -263,7 +254,12 @@ public class Player : MonoBehaviour
                 ModifyPoints(50);
                 lifes[numLifes - 1].SetActive(true);
                 Destroy(other.gameObject);
-            }            
+            }
+            else
+            {
+                ModifyPoints(200);
+                Destroy(other.gameObject);
+            }
         if (other.gameObject.CompareTag("DeathZone"))
         {
             StartCoroutine(Resurection()); //En esta corrutina de "Resurrección" se reinicia

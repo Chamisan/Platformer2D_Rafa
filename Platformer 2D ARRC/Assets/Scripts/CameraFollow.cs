@@ -8,12 +8,8 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] Vector3 offset, minLimit, maxLimit;
     [SerializeField] float smoothFactor;
 
-    private void Start()
-    {
-        playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
-    }
+    private void Start() => playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
     void FixedUpdate() => Follow();
-
     void Follow()
     {
         Vector3 targetPosition = playerTransform.position + offset; //Primer vector de posición con el offset que establecí desde el inicio.

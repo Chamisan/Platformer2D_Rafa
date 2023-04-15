@@ -1,38 +1,31 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Foes : MonoBehaviour
 {
     [SerializeField] float foeVelocity;
     Animator animatorFoe;
-    //bool bat;
-    //bool skull;
-    void Start()
-    {
-        animatorFoe = GetComponent<Animator>();
-    }
+
+    void Start() => animatorFoe = GetComponent<Animator>();
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.transform != null && collision.gameObject.transform.parent != null &&
-    collision.gameObject.transform.parent.TryGetComponent(out Player player) && player.onAttack)
-        //        if (collision.gameObject.transform.parent.TryGetComponent(out Player player) && player.onAttack)
+        collision.gameObject.transform.parent.TryGetComponent(out Player player) && player.onAttack)
+        // Todo este if para saber si está el objeto Player en modo ataque porque su trigger de ataque es un hijo de ese objeto
         {
             Die();
             GameManager.points += 50;
         }
-            
         if (collision.gameObject.CompareTag("Fire"))
         {
             Die();
             GameManager.points += 250;
-        }
-            
+        }       
     }
     private void Die()
     {
         animatorFoe.SetTrigger("death");
+        gameObject.GetComponent<Collider2D>().enabled = false;
         Destroy(gameObject, 0.8f);
     }
 }
