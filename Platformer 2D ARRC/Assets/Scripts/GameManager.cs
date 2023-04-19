@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
     public static GameManager instance { get; private set; }
 
     public static int points = 0;
+    public static int maxPoints;
     public static int lifesPlayer = 3;
     public static TextMeshProUGUI score;
     //Este Awake es complementario a lo anterior, hace una instancia de esta clase desde el principio de todo.
@@ -48,13 +49,14 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         lifesPlayer = 3; //Reinicia conteo de vidas 
-        points = 0;
+        points = maxPoints;
     }   
     public static void NextLvl()
     {
         SceneManager.LoadScene(2);
         score = GameObject.Find("ScorePoints")?.GetComponent<TextMeshProUGUI>();
         score.SetText(points.ToString().PadLeft(5, '0'));
+        maxPoints = points;
     }
     public static void RestartGame() => SceneManager.LoadScene("Main");
     public static void ExitGame() => Application.Quit();

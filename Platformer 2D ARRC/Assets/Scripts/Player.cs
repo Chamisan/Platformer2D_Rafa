@@ -292,14 +292,12 @@ public class Player : MonoBehaviour
             spawnPosition = checkpointPosition + new Vector3(1,2,0); //El vector 3 extra es porque sino queda atorado en el suelo así que lo muevo tantito
         if (other.gameObject.CompareTag("Finish")) //Si el personaje obtiene el objeto meta que tiene el tag Finish, gana :)
             Win();
-        if (other.gameObject.name == "dragonEye")
-        {
-            AudioSource audioSource = other.gameObject.GetComponent<AudioSource>();
-            if (audioSource != null && audioSource.clip != null)
+            if (other.gameObject.name == "dragonEye")
             {
-                AudioManager.instance.PlaySound(audioSource.clip);
+                AudioSource audioSource = other.gameObject.GetComponent<AudioSource>();
+                if (audioSource != null && audioSource.clip != null)
+                    AudioManager.instance.PlaySound(audioSource.clip);
             }
-        }
 
     }
     private void OnTriggerExit2D(Collider2D other)
