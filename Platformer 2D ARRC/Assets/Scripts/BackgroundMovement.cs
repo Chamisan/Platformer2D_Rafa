@@ -12,7 +12,7 @@ public class BackgroundMovement : MonoBehaviour
     void Awake()
     {
         material = GetComponent<SpriteRenderer>().material;
-        rbPlayer = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody2D>();
+        rbPlayer = GameObject.Find("Player").GetComponent<Rigidbody2D>();
     }
 
     void Update()

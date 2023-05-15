@@ -133468,6 +133468,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2092542584}
     - target: {fileID: 1109773501, guid: f881ebcfc95fe9b42ae2d59e1d9ae594, type: 3}
+      propertyPath: movementSmoothness
+      value: 0.063
+      objectReference: {fileID: 0}
+    - target: {fileID: 1109773501, guid: f881ebcfc95fe9b42ae2d59e1d9ae594, type: 3}
       propertyPath: lifes.Array.data[0]
       value: 
       objectReference: {fileID: 2008289584}
@@ -141863,6 +141867,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5099240080390871306, guid: a651c5eb6d8ea24499bc4dfd1d58aa53, type: 3}
+      propertyPath: speedUp
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 5099240080390871307, guid: a651c5eb6d8ea24499bc4dfd1d58aa53, type: 3}
       propertyPath: m_RootOrder
       value: 14

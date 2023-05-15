@@ -8,7 +8,7 @@ public class Fireball : MonoBehaviour
     bool fire;
     private void Start()
     {
-        playerTransform = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>(); 
+        playerTransform = GameObject.Find("Player").GetComponent<Transform>(); 
         fire = false;
         transform.localScale = new Vector3(playerTransform.localScale.x, transform.localScale.y, transform.localScale.z); //Para la dirección del objeto instanciado
     }
